@@ -34,23 +34,25 @@ function ClickHandler({ onMapClick, active }) {
   return null;
 }
 
-function ViewController({ guess, targetPath, questionId }) {
+function ViewController({ guess, targetPath, questionId, homePoints }) {
   const map = useMap();
 
   useEffect(() => {
     if (guess && targetPath) {
       const points = [guess, ...targetPath.flat()];
       map.flyToBounds(L.latLngBounds(points), { padding: [80, 80], duration: 0.6, maxZoom: 17 });
+    } else if (homePoints && homePoints.length) {
+      map.flyToBounds(L.latLngBounds(homePoints), { padding: [40, 40], duration: 0.6, maxZoom: 16 });
     } else {
       map.flyTo(AMSTERDAM_CENTER, 14, { duration: 0.6 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId, guess, targetPath]);
+  }, [questionId, guess, targetPath, homePoints]);
 
   return null;
 }
 
-export default function MapView({ onMapClick, awaitingAnswer, guess, targetPath, nearestPoint, questionId }) {
+export default function MapView({ onMapClick, awaitingAnswer, guess, targetPath, nearestPoint, questionId, homePoints }) {
   const mapRef = useRef(null);
 
   return (
@@ -92,7 +94,7 @@ export default function MapView({ onMapClick, awaitingAnswer, guess, targetPath,
         />
       )}
 
-      <ViewController guess={guess} targetPath={targetPath} questionId={questionId} />
+      <ViewController guess={guess} targetPath={targetPath} questionId={questionId} homePoints={homePoints} />
     </MapContainer>
   );
 }

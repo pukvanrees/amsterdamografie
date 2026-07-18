@@ -53,6 +53,7 @@ export default function App() {
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId) ?? null, [moduleId]);
   const modulePool = useMemo(() => (module ? getModuleLocations(module.id) : []), [module]);
+  const homePoints = useMemo(() => modulePool.flatMap((l) => l.coords.flat()), [modulePool]);
 
   const awaitingAnswer = phase === "quiz" && guess === null;
   const current = queue[index];
@@ -157,6 +158,7 @@ export default function App() {
         targetPath={guess ? current?.coords : null}
         nearestPoint={lastResult?.nearest ?? null}
         questionId={current?.id}
+        homePoints={homePoints}
       />
 
       {phase === "module" && <ModuleSelect modules={MODULES} onSelect={handleSelectModule} />}
