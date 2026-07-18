@@ -8,7 +8,7 @@ import ResultsScreen from "./components/ResultsScreen";
 import Leaderboard from "./components/Leaderboard";
 import { LOCATIONS } from "./data/locations";
 import { MODULES, getModuleLocations } from "./data/modules";
-import { distanceToPath } from "./utils/geo";
+import { distanceToPath, trimmedBounds } from "./utils/geo";
 import { getNickname, setNickname as persistNickname } from "./lib/nickname";
 import { saveScore } from "./lib/scores";
 import "./App.css";
@@ -53,7 +53,20 @@ export default function App() {
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId) ?? null, [moduleId]);
   const modulePool = useMemo(() => (module ? getModuleLocations(module.id) : []), [module]);
-  const homePoints = useMemo(() => modulePool.flatMap((l) => l.coords.flat()), [modulePool]);
+  // One representative point (centroid) per location, not every path point —
+  // otherwise a single long street's far end can drag the whole module's
+  // idle/overview zoom out much further than its actual cluster of locations.
+  const homePoints = useMemo(
+    () =>
+      modulePool.map((l) => {
+        const points = l.coords.flat();
+        const lat = points.reduce((s, p) => s + p[0], 0) / points.length;
+        const lng = points.reduce((s, p) => s + p[1], 0) / points.length;
+        return [lat, lng];
+      }),
+    [modulePool]
+  );
+  const homeBounds = useMemo(() => trimmedBounds(homePoints), [homePoints]);
 
   const awaitingAnswer = phase === "quiz" && guess === null;
   const current = queue[index];
@@ -158,7 +171,7 @@ export default function App() {
         targetPath={guess ? current?.coords : null}
         nearestPoint={lastResult?.nearest ?? null}
         questionId={current?.id}
-        homePoints={homePoints}
+        homePoints={homeBounds}
       />
 
       {phase === "module" && <ModuleSelect modules={MODULES} onSelect={handleSelectModule} />}

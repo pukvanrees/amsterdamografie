@@ -82,3 +82,26 @@ export function formatDistance(meters) {
   if (meters < 1000) return `${Math.round(meters)} m`;
   return `${(meters / 1000).toFixed(2)} km`;
 }
+
+function percentile(sorted, p) {
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+// Bounding box that excludes the most extreme `trim` fraction of points on
+// each side, so a couple of outlier locations (e.g. one long street that
+// reaches further than the rest of a district) don't dictate an overly wide
+// overview zoom. The specific question view (once answered) still fits the
+// exact guess/target regardless of this.
+export function trimmedBounds(points, trim = 0.03) {
+  if (points.length < 4) return points;
+  const lats = points.map((p) => p[0]).sort((a, b) => a - b);
+  const lngs = points.map((p) => p[1]).sort((a, b) => a - b);
+  return [
+    [percentile(lats, trim), percentile(lngs, trim)],
+    [percentile(lats, 1 - trim), percentile(lngs, 1 - trim)],
+  ];
+}
