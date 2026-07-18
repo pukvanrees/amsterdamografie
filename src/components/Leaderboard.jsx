@@ -7,6 +7,16 @@ const CATEGORY_LABELS = {
   square: "Alleen pleinen",
 };
 
+function formatDateTime(iso) {
+  return new Date(iso).toLocaleString("nl-NL", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function Leaderboard({ onBack }) {
   const [scores, setScores] = useState(null);
   const [error, setError] = useState(null);
@@ -39,14 +49,17 @@ export default function Leaderboard({ onBack }) {
         <div className="missed-list">
           <ul>
             {scores.map((s, i) => (
-              <li key={i}>
-                <span className="missed-name">
-                  {i + 1}. {s.nickname}{" "}
-                  <span className="close-note">({CATEGORY_LABELS[s.category] ?? s.category})</span>
-                </span>
-                <span className="missed-distance">
-                  {s.score} / {s.total}
-                </span>
+              <li key={i} className="leaderboard-row">
+                <div className="leaderboard-main">
+                  <span className="missed-name">
+                    {i + 1}. {s.nickname}{" "}
+                    <span className="close-note">({CATEGORY_LABELS[s.category] ?? s.category})</span>
+                  </span>
+                  <span className="missed-distance">
+                    {s.score} / {s.total}
+                  </span>
+                </div>
+                <span className="leaderboard-date">{formatDateTime(s.created_at)}</span>
               </li>
             ))}
           </ul>
