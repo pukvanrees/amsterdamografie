@@ -12,6 +12,13 @@
   background: #dfe3e6;
 }
 
+/* Boost contrast on the base tiles so the green street/marker overlays
+   read clearly against the gray, without affecting the overlays themselves
+   (they're a separate Leaflet pane, not part of this tile image layer). */
+.map-tiles {
+  filter: contrast(1.3) saturate(0.75) brightness(0.94);
+}
+
 /* Leaflet pins */
 .pin {
   width: 18px;
