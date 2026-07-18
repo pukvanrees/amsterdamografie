@@ -1,18 +1,19 @@
 import { supabase } from "./supabase";
 
-export async function saveScore({ nickname, score, total, category }) {
+export async function saveScore({ nickname, score, total, category, module }) {
   if (!supabase) return { error: "Supabase not configured" };
   const { error } = await supabase
     .from("scores")
-    .insert({ nickname, score, total, category });
+    .insert({ nickname, score, total, category, module });
   return { error: error?.message ?? null };
 }
 
-export async function fetchTopScores(limit = 10) {
+export async function fetchTopScores(module, limit = 10) {
   if (!supabase) return { scores: [], error: "Supabase not configured" };
   const { data, error } = await supabase
     .from("scores")
     .select("nickname, score, total, category, created_at")
+    .eq("module", module)
     .order("score", { ascending: false })
     .order("created_at", { ascending: true })
     .limit(limit);

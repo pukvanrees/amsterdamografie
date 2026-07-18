@@ -17,13 +17,15 @@ function formatDateTime(iso) {
   });
 }
 
-export default function Leaderboard({ onBack }) {
+export default function Leaderboard({ moduleId, moduleName, onBack }) {
   const [scores, setScores] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetchTopScores(10).then(({ scores, error }) => {
+    setScores(null);
+    setError(null);
+    fetchTopScores(moduleId, 10).then(({ scores, error }) => {
       if (cancelled) return;
       setScores(scores);
       setError(error);
@@ -31,11 +33,11 @@ export default function Leaderboard({ onBack }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [moduleId]);
 
   return (
     <div className="overlay-panel results-panel">
-      <h1>Scorebord</h1>
+      <h1>Scorebord &mdash; {moduleName}</h1>
 
       {error && <p className="subtitle">Scorebord kon niet geladen worden.</p>}
 

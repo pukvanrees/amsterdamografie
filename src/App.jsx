@@ -1,11 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import "leaflet/dist/leaflet.css";
 import MapView from "./components/MapView";
+import ModuleSelect from "./components/ModuleSelect";
 import StartScreen from "./components/StartScreen";
 import QuizHUD from "./components/QuizHUD";
 import ResultsScreen from "./components/ResultsScreen";
 import Leaderboard from "./components/Leaderboard";
 import { LOCATIONS } from "./data/locations";
+import { MODULES, getModuleLocations } from "./data/modules";
 import { distanceToPath } from "./utils/geo";
 import { getNickname, setNickname as persistNickname } from "./lib/nickname";
 import { saveScore } from "./lib/scores";
@@ -23,9 +25,9 @@ function shuffle(arr) {
   return copy;
 }
 
-function buildQueue({ length, filter }) {
-  const pool = filter === "all" ? LOCATIONS : LOCATIONS.filter((l) => l.type === filter);
-  return shuffle(pool).slice(0, Math.min(length, pool.length));
+function buildQueue(pool, { length, filter }) {
+  const filtered = filter === "all" ? pool : pool.filter((l) => l.type === filter);
+  return shuffle(filtered).slice(0, Math.min(length, filtered.length));
 }
 
 function tierFor(distance) {
@@ -35,8 +37,9 @@ function tierFor(distance) {
 }
 
 export default function App() {
-  const [phase, setPhase] = useState("start");
-  const [prevPhase, setPrevPhase] = useState("start");
+  const [phase, setPhase] = useState("module");
+  const [prevPhase, setPrevPhase] = useState("module");
+  const [moduleId, setModuleId] = useState(null);
   const [queue, setQueue] = useState([]);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -48,6 +51,9 @@ export default function App() {
   const [category, setCategory] = useState("all");
   const [saveStatus, setSaveStatus] = useState(null);
 
+  const module = useMemo(() => MODULES.find((m) => m.id === moduleId) ?? null, [moduleId]);
+  const modulePool = useMemo(() => (module ? getModuleLocations(module.id) : []), [module]);
+
   const awaitingAnswer = phase === "quiz" && guess === null;
   const current = queue[index];
 
@@ -56,18 +62,32 @@ export default function App() {
     persistNickname(value);
   }, []);
 
-  const handleStart = useCallback((options) => {
-    const q = buildQueue(options);
-    setQueue(q);
-    setIndex(0);
-    setScore(0);
-    setAnswers([]);
-    setGuess(null);
-    setLastResult(null);
-    setCategory(options.filter);
-    setSaveStatus(null);
-    setPhase("quiz");
+  const handleSelectModule = useCallback((id) => {
+    setModuleId(id);
+    setBestScore(null);
+    setPhase("start");
   }, []);
+
+  const handleBackToModules = useCallback(() => {
+    setModuleId(null);
+    setPhase("module");
+  }, []);
+
+  const handleStart = useCallback(
+    (options) => {
+      const q = buildQueue(modulePool, options);
+      setQueue(q);
+      setIndex(0);
+      setScore(0);
+      setAnswers([]);
+      setGuess(null);
+      setLastResult(null);
+      setCategory(options.filter);
+      setSaveStatus(null);
+      setPhase("quiz");
+    },
+    [modulePool]
+  );
 
   const handleReview = useCallback((missed) => {
     const q = shuffle(missed.map((m) => LOCATIONS.find((l) => l.id === m.id)).filter(Boolean));
@@ -101,15 +121,17 @@ export default function App() {
       setBestScore((prev) => (prev == null ? finalScore : Math.max(prev, finalScore)));
       setPhase("results");
       setSaveStatus("saving");
-      saveScore({ nickname, score: finalScore, total: queue.length, category }).then(({ error }) => {
-        setSaveStatus(error ? "error" : "saved");
-      });
+      saveScore({ nickname, score: finalScore, total: queue.length, category, module: moduleId }).then(
+        ({ error }) => {
+          setSaveStatus(error ? "error" : "saved");
+        }
+      );
       return;
     }
     setIndex((i) => i + 1);
     setGuess(null);
     setLastResult(null);
-  }, [index, queue.length, score, nickname, category]);
+  }, [index, queue.length, score, nickname, category, moduleId]);
 
   const handleQuit = useCallback(() => {
     setPhase("start");
@@ -137,8 +159,12 @@ export default function App() {
         questionId={current?.id}
       />
 
-      {phase === "start" && (
+      {phase === "module" && <ModuleSelect modules={MODULES} onSelect={handleSelectModule} />}
+
+      {phase === "start" && module && (
         <StartScreen
+          module={module}
+          onBack={handleBackToModules}
           onStart={handleStart}
           bestScore={bestScore}
           nickname={nickname}
@@ -170,7 +196,9 @@ export default function App() {
         />
       )}
 
-      {phase === "leaderboard" && <Leaderboard onBack={handleBackFromLeaderboard} />}
+      {phase === "leaderboard" && module && (
+        <Leaderboard moduleId={module.id} moduleName={module.name} onBack={handleBackFromLeaderboard} />
+      )}
     </div>
   );
 }

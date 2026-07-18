@@ -1,23 +1,33 @@
 import { useState } from "react";
 
-const LENGTH_OPTIONS = [10, 25, 50];
 const FILTER_OPTIONS = [
   { value: "all", label: "Straten & pleinen" },
   { value: "street", label: "Alleen straten" },
   { value: "square", label: "Alleen pleinen" },
 ];
 
-export default function StartScreen({ onStart, bestScore, nickname, onNicknameChange, onShowLeaderboard }) {
-  const [length, setLength] = useState(25);
+function lengthOptionsFor(max) {
+  if (max >= 50) return [10, 25, 50];
+  const mid = max >= 20 ? 15 : Math.max(5, Math.round(max / 2 / 5) * 5);
+  return Array.from(new Set([10, mid, max])).filter((n) => n <= max);
+}
+
+export default function StartScreen({ module, onBack, onStart, bestScore, nickname, onNicknameChange, onShowLeaderboard }) {
+  const maxLength = module.locationIds.length;
+  const lengthOptions = lengthOptionsFor(maxLength);
+  const [length, setLength] = useState(lengthOptions[lengthOptions.length - 1]);
   const [filter, setFilter] = useState("all");
   const canStart = nickname.trim().length > 0;
 
   return (
     <div className="overlay-panel start-panel">
-      <h1>Amsterdamografie</h1>
+      <button className="back-link" onClick={onBack}>
+        &larr; Andere module
+      </button>
+      <h1>{module.name}</h1>
       <p className="subtitle">
-        Test je kennis van de top 50 straten en pleinen van Amsterdam. Je krijgt een naam
-        te zien &mdash; klik op de kaart waar jij denkt dat die zich bevindt.
+        Je krijgt een naam te zien &mdash; klik op de kaart waar jij denkt dat die zich
+        bevindt.
       </p>
 
       <div className="option-group">
@@ -35,7 +45,7 @@ export default function StartScreen({ onStart, bestScore, nickname, onNicknameCh
       <div className="option-group">
         <span className="option-label">Aantal vragen</span>
         <div className="option-row">
-          {LENGTH_OPTIONS.map((n) => (
+          {lengthOptions.map((n) => (
             <button
               key={n}
               className={`chip ${length === n ? "chip-active" : ""}`}

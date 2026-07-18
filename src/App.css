@@ -60,6 +60,50 @@
   margin-bottom: 20px;
 }
 
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.module-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.module-card:hover {
+  border-color: var(--accent);
+}
+
+.module-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.back-link {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 0;
+  margin-bottom: 14px;
+}
+
+.back-link:hover {
+  color: var(--text);
+}
+
 .option-group {
   margin-bottom: 18px;
 }
