@@ -70,6 +70,27 @@ export const MODULES = [
       "willemdezwijgerlaan",
     ],
   },
+  {
+    id: "zuidoost",
+    name: "Amsterdam Zuidoost",
+    locationIds: [
+      "antondekomplein", "bijlmerplein", "arenaboulevard", "karspeldreef", "bijlmerdreef",
+      "gooiseweg", "ganzenhoef", "kraaiennest", "holendrechtstraat", "daalwijkdreef",
+      "flierbosdreef", "foppingadreef", "hoogoorddreef", "kikkenstein", "guldenkruis",
+      "grubbehoeve", "kelbergen", "hoekenrode", "bullewijkpad", "loosdrechtdreef",
+    ],
+  },
+  {
+    id: "nieuw-west",
+    name: "Amsterdam Nieuw-West",
+    locationIds: [
+      "osdorpplein", "johanhuizingalaan", "slotermeerlaan", "plesmanlaan", "sloterweg",
+      "meerenvaart", "anderlechtlaan", "cornelislelylaan", "badenpowellweg", "delflandplein",
+      "alettajacobslaan", "pietercalandlaan", "osdorperweg", "sierplein",
+      "burgemeesterdevlugtlaan", "jantooropstraat", "dijkgraafplein", "meervaart",
+      "tussenmeer", "ookmeerweg",
+    ],
+  },
 ];
 
 export function getModuleLocations(moduleId) {
