@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { fetchTopScores } from "../lib/scores";
 
-const CATEGORY_LABELS = {
-  all: "Straten & pleinen",
-  street: "Alleen straten",
-  square: "Alleen pleinen",
-};
-
-function formatDateTime(iso) {
-  return new Date(iso).toLocaleString("nl-NL", {
+function formatDateTime(iso, locale) {
+  return new Date(iso).toLocaleString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -17,9 +11,11 @@ function formatDateTime(iso) {
   });
 }
 
-export default function Leaderboard({ moduleId, moduleName, onBack }) {
+export default function Leaderboard({ moduleId, moduleName, onBack, t }) {
   const [scores, setScores] = useState(null);
   const [error, setError] = useState(null);
+
+  const categoryLabels = { all: t.filterAll, street: t.filterStreet, square: t.filterSquare };
 
   useEffect(() => {
     let cancelled = false;
@@ -37,15 +33,13 @@ export default function Leaderboard({ moduleId, moduleName, onBack }) {
 
   return (
     <div className="overlay-panel results-panel">
-      <h1>Scorebord &mdash; {moduleName}</h1>
+      <h1>{t.leaderboardTitle(moduleName)}</h1>
 
-      {error && <p className="subtitle">Scorebord kon niet geladen worden.</p>}
+      {error && <p className="subtitle">{t.leaderboardError}</p>}
 
-      {!error && scores == null && <p className="subtitle">Laden...</p>}
+      {!error && scores == null && <p className="subtitle">{t.loading}</p>}
 
-      {!error && scores != null && scores.length === 0 && (
-        <p className="subtitle">Nog geen scores. Speel een potje om als eerste op het bord te komen.</p>
-      )}
+      {!error && scores != null && scores.length === 0 && <p className="subtitle">{t.leaderboardEmpty}</p>}
 
       {!error && scores != null && scores.length > 0 && (
         <div className="missed-list">
@@ -55,13 +49,13 @@ export default function Leaderboard({ moduleId, moduleName, onBack }) {
                 <div className="leaderboard-main">
                   <span className="missed-name">
                     {i + 1}. {s.nickname}{" "}
-                    <span className="close-note">({CATEGORY_LABELS[s.category] ?? s.category})</span>
+                    <span className="close-note">({categoryLabels[s.category] ?? s.category})</span>
                   </span>
                   <span className="missed-distance">
                     {s.score} / {s.total}
                   </span>
                 </div>
-                <span className="leaderboard-date">{formatDateTime(s.created_at)}</span>
+                <span className="leaderboard-date">{formatDateTime(s.created_at, t.dateLocale)}</span>
               </li>
             ))}
           </ul>
@@ -69,7 +63,7 @@ export default function Leaderboard({ moduleId, moduleName, onBack }) {
       )}
 
       <button className="primary-btn" onClick={onBack}>
-        Terug
+        {t.back}
       </button>
     </div>
   );

@@ -1,12 +1,12 @@
 import { formatDistance } from "../utils/geo";
 
-const SAVE_STATUS_TEXT = {
-  saving: "Score opslaan...",
-  saved: "Score opgeslagen op het scorebord.",
-  error: "Score kon niet opgeslagen worden.",
+const SAVE_STATUS_KEY = {
+  saving: "saving",
+  saved: "saved",
+  error: "saveError",
 };
 
-export default function ResultsScreen({ answers, onRestart, onReview, onShowLeaderboard, saveStatus }) {
+export default function ResultsScreen({ answers, onRestart, onReview, onShowLeaderboard, saveStatus, t }) {
   const total = answers.length;
   const correct = answers.filter((a) => a.tier === "correct").length;
   const close = answers.filter((a) => a.tier === "close").length;
@@ -14,17 +14,17 @@ export default function ResultsScreen({ answers, onRestart, onReview, onShowLead
 
   return (
     <div className="overlay-panel results-panel">
-      <h1>Resultaat</h1>
+      <h1>{t.resultTitle}</h1>
       <p className="score-summary">
-        {correct} / {total} correct
-        {close > 0 && <span className="close-note"> &middot; {close} dichtbij</span>}
+        {t.scoreSummary(correct, total)}
+        {close > 0 && <span className="close-note"> &middot; {t.closeNote(close)}</span>}
       </p>
 
-      {saveStatus && <p className="subtitle save-status">{SAVE_STATUS_TEXT[saveStatus]}</p>}
+      {saveStatus && <p className="subtitle save-status">{t[SAVE_STATUS_KEY[saveStatus]]}</p>}
 
       {missed.length > 0 && (
         <div className="missed-list">
-          <span className="option-label">Nog even oefenen</span>
+          <span className="option-label">{t.practiceMore}</span>
           <ul>
             {missed.map((a) => (
               <li key={a.id}>
@@ -38,16 +38,16 @@ export default function ResultsScreen({ answers, onRestart, onReview, onShowLead
 
       <div className="option-row">
         <button className="primary-btn" onClick={onRestart}>
-          Nog een keer
+          {t.restart}
         </button>
         {missed.length > 0 && (
           <button className="secondary-btn" onClick={() => onReview(missed)}>
-            Oefen gemiste locaties
+            {t.practiceMissed}
           </button>
         )}
       </div>
       <button className="secondary-btn full-width" onClick={onShowLeaderboard}>
-        Bekijk scorebord
+        {t.viewLeaderboard}
       </button>
     </div>
   );

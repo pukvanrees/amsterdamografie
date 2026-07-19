@@ -6,10 +6,13 @@ import StartScreen from "./components/StartScreen";
 import QuizHUD from "./components/QuizHUD";
 import ResultsScreen from "./components/ResultsScreen";
 import Leaderboard from "./components/Leaderboard";
+import LanguageToggle from "./components/LanguageToggle";
 import { LOCATIONS } from "./data/locations";
 import { MODULES, getModuleLocations } from "./data/modules";
 import { distanceToPath, trimmedBounds } from "./utils/geo";
 import { getNickname, setNickname as persistNickname } from "./lib/nickname";
+import { getLanguage, setLanguage as persistLanguage } from "./lib/language";
+import { getTranslations } from "./lib/i18n";
 import { saveScore } from "./lib/scores";
 import "./App.css";
 
@@ -50,6 +53,8 @@ export default function App() {
   const [nickname, setNickname] = useState(getNickname);
   const [category, setCategory] = useState("all");
   const [saveStatus, setSaveStatus] = useState(null);
+  const [language, setLanguageState] = useState(getLanguage);
+  const t = useMemo(() => getTranslations(language), [language]);
 
   const module = useMemo(() => MODULES.find((m) => m.id === moduleId) ?? null, [moduleId]);
   const modulePool = useMemo(() => (module ? getModuleLocations(module.id) : []), [module]);
@@ -74,6 +79,11 @@ export default function App() {
   const handleNicknameChange = useCallback((value) => {
     setNickname(value);
     persistNickname(value);
+  }, []);
+
+  const handleLanguageChange = useCallback((lang) => {
+    setLanguageState(lang);
+    persistLanguage(lang);
   }, []);
 
   const handleSelectModule = useCallback((id) => {
@@ -174,7 +184,9 @@ export default function App() {
         homePoints={homeBounds}
       />
 
-      {phase === "module" && <ModuleSelect modules={MODULES} onSelect={handleSelectModule} />}
+      <LanguageToggle language={language} onChange={handleLanguageChange} />
+
+      {phase === "module" && <ModuleSelect modules={MODULES} onSelect={handleSelectModule} t={t} />}
 
       {phase === "start" && module && (
         <StartScreen
@@ -185,6 +197,7 @@ export default function App() {
           nickname={nickname}
           onNicknameChange={handleNicknameChange}
           onShowLeaderboard={handleShowLeaderboard}
+          t={t}
         />
       )}
 
@@ -198,6 +211,7 @@ export default function App() {
           lastResult={lastResult}
           onNext={handleNext}
           onQuit={handleQuit}
+          t={t}
         />
       )}
 
@@ -208,11 +222,12 @@ export default function App() {
           onReview={handleReview}
           onShowLeaderboard={handleShowLeaderboard}
           saveStatus={saveStatus}
+          t={t}
         />
       )}
 
       {phase === "leaderboard" && module && (
-        <Leaderboard moduleId={module.id} moduleName={module.name} onBack={handleBackFromLeaderboard} />
+        <Leaderboard moduleId={module.id} moduleName={module.name} onBack={handleBackFromLeaderboard} t={t} />
       )}
     </div>
   );

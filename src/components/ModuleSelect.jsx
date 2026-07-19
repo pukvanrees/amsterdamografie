@@ -1,17 +1,14 @@
-export default function ModuleSelect({ modules, onSelect }) {
+export default function ModuleSelect({ modules, onSelect, t }) {
   return (
     <div className="overlay-panel start-panel">
-      <h1>Amsterdamografie</h1>
-      <p className="subtitle">
-        Test je kennis van de straten en pleinen van Amsterdam. Kies eerst welke module je
-        wilt spelen.
-      </p>
+      <h1>{t.appTitle}</h1>
+      <p className="subtitle">{t.moduleSelectSubtitle}</p>
 
       <div className="module-list">
         {modules.map((m) => (
           <button key={m.id} className="module-card" onClick={() => onSelect(m.id)}>
             <span className="module-name">{m.name}</span>
-            <span className="module-count">{m.locationIds.length} locaties</span>
+            <span className="module-count">{t.locationsCount(m.locationIds.length)}</span>
           </button>
         ))}
       </div>
