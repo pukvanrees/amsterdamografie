@@ -38,14 +38,37 @@ function ViewController({ guess, targetPath, questionId, homePoints }) {
   const map = useMap();
 
   useEffect(() => {
-    if (guess && targetPath) {
-      const points = [guess, ...targetPath.flat()];
-      map.flyToBounds(L.latLngBounds(points), { padding: [80, 80], duration: 0.6, maxZoom: 17 });
-    } else if (homePoints && homePoints.length) {
-      map.flyToBounds(L.latLngBounds(homePoints), { padding: [40, 40], duration: 0.6, maxZoom: 16 });
-    } else {
-      map.flyTo(AMSTERDAM_CENTER, 14, { duration: 0.6 });
+    let cancelled = false;
+    let frame;
+
+    // On a cold load the map container can still be 0x0 the first time this
+    // effect runs (layout hasn't settled yet), and Leaflet's flyTo/flyToBounds
+    // compute NaN in that case, throwing and crashing the whole app (no error
+    // boundary). Wait until the container actually has a size before moving.
+    function run() {
+      if (cancelled) return;
+      const size = map.getSize();
+      if (size.x === 0 || size.y === 0) {
+        map.invalidateSize();
+        frame = requestAnimationFrame(run);
+        return;
+      }
+
+      if (guess && targetPath) {
+        const points = [guess, ...targetPath.flat()];
+        map.flyToBounds(L.latLngBounds(points), { padding: [80, 80], duration: 0.6, maxZoom: 17 });
+      } else if (homePoints && homePoints.length) {
+        map.flyToBounds(L.latLngBounds(homePoints), { padding: [40, 40], duration: 0.6, maxZoom: 16 });
+      } else {
+        map.flyTo(AMSTERDAM_CENTER, 14, { duration: 0.6 });
+      }
     }
+    run();
+
+    return () => {
+      cancelled = true;
+      if (frame) cancelAnimationFrame(frame);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionId, guess, targetPath, homePoints]);
 
