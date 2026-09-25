@@ -88,10 +88,14 @@ export default function MapView({ onMapClick, awaitingAnswer, guess, targetPath,
       ref={mapRef}
       zoomControl={false}
     >
+      {/* TEMPORARY: CARTO's basemaps now require an API key (all styles),
+          and Esri's "label-free" canvas base still renders some street
+          labels. Standard OSM tiles restore full functionality while a
+          proper label-free replacement (likely OpenFreeMap vector tiles)
+          is worked out. This does show street names on the map again. */}
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
-        subdomains="abcd"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <ClickHandler onMapClick={onMapClick} active={awaitingAnswer} />
 
