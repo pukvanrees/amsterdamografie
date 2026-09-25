@@ -12,6 +12,13 @@
   background: #dfe3e6;
 }
 
+/* Softens OSM's default look back toward the previous abstract style, and
+   as a side effect blurs small text (street labels) toward illegibility
+   while roads/water/parks stay readable. */
+.map-tiles {
+  filter: blur(1.3px) contrast(0.92) saturate(0.85) brightness(1.05);
+}
+
 /* Leaflet pins */
 .pin {
   width: 18px;

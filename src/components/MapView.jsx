@@ -88,12 +88,12 @@ export default function MapView({ onMapClick, awaitingAnswer, guess, targetPath,
       ref={mapRef}
       zoomControl={false}
     >
-      {/* TEMPORARY: CARTO's basemaps now require an API key (all styles),
-          and Esri's "label-free" canvas base still renders some street
-          labels. Standard OSM tiles restore full functionality while a
-          proper label-free replacement (likely OpenFreeMap vector tiles)
-          is worked out. This does show street names on the map again. */}
+      {/* CARTO's basemaps now require an API key (all styles), so we're back
+          on standard OSM tiles. A blur softens the look back toward the
+          previous abstract style and, as a side effect, makes the small
+          street-label text illegible while roads/water/parks stay readable. */}
       <TileLayer
+        className="map-tiles"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
